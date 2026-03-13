@@ -5,4 +5,4 @@ const noteSchema = new mongoose.Schema({
     content: {type: String, required: true},
 }, {timestamps: true});
 
-modeule.exports = mongoose.model("Note", noteSchema);
+module.exports = mongoose.model("Note", noteSchema);
