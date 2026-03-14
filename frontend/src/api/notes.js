@@ -1,0 +1,40 @@
+const BASE_URL = 'http://localhost:5000/api/notes'
+
+// Get all
+export const getNotes = async () => {
+    const res = await fetch(BASE_URL);
+    return res.json();
+}
+
+// Get by ID
+export const getNote = async (id) => {
+    const res = await fetch(`${BASE_URL}/${id}`);
+    return res.json();
+}
+
+// Post create
+export const createNote = async (data) => {
+    const res = await fetch (BASE_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'applications/json'},
+        body: JSON.stringify(data)
+    })
+    return res.json();
+}
+
+// Patch update
+export const updateNote = async (id, data) => {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'applications/json'},
+        body: JSON.stringify(data)
+    })
+}
+
+// Delete
+export const deleteNote = async (id) => {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+        method: 'DELETE'
+    })
+    return res.json();
+}
