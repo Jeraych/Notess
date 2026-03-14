@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Read
+// Get all with pagination and sort
 router.get('/', async (req, res) => {
     try {
         const {page = 1, limit = 10, sort = '-createdAt'} = req.query;
@@ -42,6 +42,22 @@ router.get('/', async (req, res) => {
             }
         });
     } catch (error) {
+        res.status(500).json({error: 'Server error'});
+    }
+})
+
+// Get by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.id);
+        if (!note) {
+            return res.status(404).json({error: "Note not found"});
+        }
+        res.json(note);
+    } catch (error) {
+        if (error.name === 'CastError') {
+            return res.status(400).json({error: 'Invalid note ID'});
+        }
         res.status(500).json({error: 'Server error'});
     }
 })
