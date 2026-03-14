@@ -3,7 +3,8 @@ const BASE_URL = 'http://localhost:5000/api/notes'
 // Get all
 export const getNotes = async () => {
     const res = await fetch(BASE_URL);
-    return res.json();
+    const data = await res.json()
+    return data.notes;
 }
 
 // Get by ID
