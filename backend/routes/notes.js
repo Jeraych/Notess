@@ -51,7 +51,7 @@ router.get('/:id', async (req, res) => {
     try {
         const note = await Note.findById(req.params.id);
         if (!note) {
-            return res.status(404).json({error: "Note not found"});
+            return res.status(404).json({error: 'Note not found'});
         }
         res.json(note);
     } catch (error) {
@@ -63,7 +63,18 @@ router.get('/:id', async (req, res) => {
 })
 
 // Update
-
+router.patch('/:id', async (req, res) => {
+    try {
+        const note = await Note.findByIdAndUpdate(
+            req.params.id,
+            {$set: req.body},
+            {new: true, runValidators:true}
+        );
+        res.json(note);
+    } catch (error) {
+        res.status(400).json({error: error.message});
+    }
+});
 
 // Delete
 
