@@ -25,7 +25,7 @@ function NoteList({ notes, onSelectNote, selectedNoteId }) {
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${tag.dot}`} />
               <span className="text-sm font-medium text-gray-800 truncate">{note.title}</span>
             </div>
-            <p className="text-xs text-gray-400 truncate pl-4">{note.body?.split('\n')[0]}</p>
+            <p className="text-xs text-gray-400 truncate pl-4">{note.content?.split('\n')[0]}</p>
             <p className="text-xs text-gray-300 mt-0.5 pl-4">
                 {new Date(note.createdAt).toLocaleDateString('en-NZ', {
                     month: 'short', day: 'numeric', year: 'numeric'

@@ -68,7 +68,7 @@ router.patch('/:id', async (req, res) => {
         const note = await Note.findByIdAndUpdate(
             req.params.id,
             {$set: req.body},
-            {new: true, runValidators:true}
+            {returnDocument: 'after', runValidators:true}
         );
         if (!note) {
             return res.status(404).json({ error: 'Note not found' });

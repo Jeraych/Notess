@@ -16,6 +16,20 @@ function Home() {
   const [selectedNote, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+  getNotes()
+      .then(data => setNotes(data))
+      .catch(() => setError('Failed to load notes'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (error) return (
+  <div className="flex h-screen w-full items-center justify-center text-red-400">
+      {error}
+  </div>
+  );
 
   useEffect(() => {
     getNotes()
