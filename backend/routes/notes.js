@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
             .sort(sort)
             .skip((page - 1) * limit)
             .limit(parseInt(limit))
-            .select('title content')
+            .select('title content tag createdAt')
 
         const total = await Note.countDocuments(query);
 
@@ -70,6 +70,9 @@ router.patch('/:id', async (req, res) => {
             {$set: req.body},
             {new: true, runValidators:true}
         );
+        if (!note) {
+            return res.status(404).json({ error: 'Note not found' });
+        }
         res.json(note);
     } catch (error) {
         res.status(400).json({error: error.message});

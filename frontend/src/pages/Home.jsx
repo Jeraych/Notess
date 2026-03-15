@@ -4,10 +4,10 @@ import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 
 const INITIAL_NOTES = [
-  { id: 1, title: 'Sprint planning notes', tag: 'work',     date: 'Mar 14, 2026', body: 'Kick off the new sprint cycle. Assign tickets to frontend and backend teams. Review blockers from last sprint.\n\nPriority items:\n- Auth flow refactor\n- Notification service\n- Dashboard v2 wireframes' },
-  { id: 2, title: 'Weekend trip ideas',    tag: 'personal', date: 'Mar 12, 2026', body: 'Thinking about a long weekend somewhere quiet. Maybe Queenstown or Wanaka.\n\nThings to book:\n- Accommodation\n- Rental car\n- Hiking gear rental' },
-  { id: 3, title: 'Focus timer app concept', tag: 'idea',   date: 'Mar 10, 2026', body: 'A minimal focus timer that blocks distracting sites and tracks sessions.\n\nKey screens:\n- Timer\n- Session history\n- Settings' },
-  { id: 4, title: 'Fix prod auth bug',     tag: 'urgent',   date: 'Mar 9, 2026',  body: 'JWT tokens expiring early in Safari. Need to investigate cookie SameSite settings and token refresh logic.' },
+  { id: 1, title: 'Sprint planning notes', tag: 'work',     date: 'Mar 14, 2026', content: 'Kick off the new sprint cycle. Assign tickets to frontend and backend teams. Review blockers from last sprint.\n\nPriority items:\n- Auth flow refactor\n- Notification service\n- Dashboard v2 wireframes' },
+  { id: 2, title: 'Weekend trip ideas',    tag: 'personal', date: 'Mar 12, 2026', content: 'Thinking about a long weekend somewhere quiet. Maybe Queenstown or Wanaka.\n\nThings to book:\n- Accommodation\n- Rental car\n- Hiking gear rental' },
+  { id: 3, title: 'Focus timer app concept', tag: 'idea',   date: 'Mar 10, 2026', content: 'A minimal focus timer that blocks distracting sites and tracks sessions.\n\nKey screens:\n- Timer\n- Session history\n- Settings' },
+  { id: 4, title: 'Fix prod auth bug',     tag: 'urgent',   date: 'Mar 9, 2026',  content: 'JWT tokens expiring early in Safari. Need to investigate cookie SameSite settings and token refresh logic.' },
 ];
 
 function Home() {

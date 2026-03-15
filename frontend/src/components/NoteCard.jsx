@@ -12,12 +12,12 @@ const TAG_LIST = ['work', 'personal', 'idea', 'urgent'];
 function NoteCard({ note, onDelete, onEdit }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle]     = useState(note.title);
-  const [body, setBody]       = useState(note.body);
+  const [content, setContent]       = useState(note.content);
   const [tag, setTag]         = useState(note.tag);
 
   useEffect(() => {
     setTitle(note.title);
-    setBody(note.body);
+    setContent(note.content);
     setTag(note.tag);
     setEditing(false);
   }, [note.id]);
@@ -26,13 +26,13 @@ function NoteCard({ note, onDelete, onEdit }) {
 
   const handleSave = () => {
     if (!title.trim()) return;
-    onEdit({ ...note, title: title.trim(), body: body.trim(), tag });
+    onEdit({ ...note, title: title.trim(), content: content.trim(), tag });
     setEditing(false);
   };
 
   const handleCancel = () => {
     setTitle(note.title);
-    setBody(note.body);
+    setContent(note.content);
     setTag(note.tag);
     setEditing(false);
   };
@@ -78,8 +78,8 @@ function NoteCard({ note, onDelete, onEdit }) {
           <div className="mb-6">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Content</label>
             <textarea
-              value={body}
-              onChange={e => setBody(e.target.value)}
+              value={content}
+              onChange={e => setContent(e.target.value)}
               rows={20}
               className="w-full px-4 py-2.5 text-sm border-2 border-gray-200 rounded-lg outline-none resize-none focus:border-gray-400 transition-colors"
             />
@@ -107,7 +107,7 @@ function NoteCard({ note, onDelete, onEdit }) {
         <h2 className="text-2xl font-semibold text-gray-900 mb-2 leading-snug">{note.title}</h2>
         <p className="text-sm text-gray-400 mb-6">{note.date}</p>
         <hr className="border-t-2 border-gray-100 mb-6" />
-        <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{note.body}</div>
+        <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{note.content}</div>
       </div>
 
       <div className="px-12 py-4 border-t-2 border-gray-200 flex items-center gap-3">

@@ -9,7 +9,7 @@ const TAGS = {
 
 function NoteForm({ onNoteCreated, onCancel }) {
   const [title, setTitle] = useState('');
-  const [body, setBody]   = useState('');
+  const [content, setContent]   = useState('');
   const [tag, setTag]     = useState('work');
 
   const handleSubmit = () => {
@@ -17,7 +17,7 @@ function NoteForm({ onNoteCreated, onCancel }) {
     const newNote = {
       id: Date.now(),
       title: title.trim(),
-      body: body.trim() || '(no content)',
+      content: content.trim() || '(no content)',
       tag,
       date: new Date().toLocaleDateString('en-NZ', {
         month: 'short', day: 'numeric', year: 'numeric'
@@ -75,8 +75,8 @@ function NoteForm({ onNoteCreated, onCancel }) {
             Content
           </label>
           <textarea
-            value={body}
-            onChange={e => setBody(e.target.value)}
+            value={content}
+            onChange={e => setContent(e.target.value)}
             placeholder="Write your note here..."
             rows={20}
             className="w-full px-4 py-2.5 text-sm border-2 border-gray-200 rounded-lg outline-none resize-none focus:border-gray-400 transition-colors"
