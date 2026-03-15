@@ -1,0 +1,27 @@
+{
+  "name": "notes-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "client": "npm run dev --prefix frontend",
+    "server": "npm run dev --prefix backend",
+    "dev": "concurrently \"npm run client\" \"npm run server\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jeraych/Notess.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jeraych/Notess/issues"
+  },
+  "homepage": "https://github.com/Jeraych/Notess#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
