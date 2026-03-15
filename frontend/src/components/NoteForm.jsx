@@ -9,8 +9,8 @@ const TAGS = {
 
 function NoteForm({ onNoteCreated, onCancel }) {
   const [title, setTitle] = useState('');
-  const [content, setContent]   = useState('');
-  const [tag, setTag]     = useState('work');
+  const [content, setContent] = useState('');
+  const [tag, setTag] = useState('work');
 
   const handleSubmit = () => {
     if (!title.trim()) return;

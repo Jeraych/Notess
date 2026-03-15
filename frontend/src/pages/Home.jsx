@@ -1,35 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getNotes, createNote, updateNote, deleteNote } from "../api/notes";
 import NoteList from "../components/NoteList";
 import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 
-const INITIAL_NOTES = [
-  { id: 1, title: 'Sprint planning notes', tag: 'work',     date: 'Mar 14, 2026', content: 'Kick off the new sprint cycle. Assign tickets to frontend and backend teams. Review blockers from last sprint.\n\nPriority items:\n- Auth flow refactor\n- Notification service\n- Dashboard v2 wireframes' },
-  { id: 2, title: 'Weekend trip ideas',    tag: 'personal', date: 'Mar 12, 2026', content: 'Thinking about a long weekend somewhere quiet. Maybe Queenstown or Wanaka.\n\nThings to book:\n- Accommodation\n- Rental car\n- Hiking gear rental' },
-  { id: 3, title: 'Focus timer app concept', tag: 'idea',   date: 'Mar 10, 2026', content: 'A minimal focus timer that blocks distracting sites and tracks sessions.\n\nKey screens:\n- Timer\n- Session history\n- Settings' },
-  { id: 4, title: 'Fix prod auth bug',     tag: 'urgent',   date: 'Mar 9, 2026',  content: 'JWT tokens expiring early in Safari. Need to investigate cookie SameSite settings and token refresh logic.' },
-];
+// const INITIAL_NOTES = [
+//   { _id: 1, title: 'Sprint planning notes', tag: 'work',     date: 'Mar 14, 2026', content: 'Kick off the new sprint cycle. Assign tickets to frontend and backend teams. Review blockers from last sprint.\n\nPriority items:\n- Auth flow refactor\n- Notification service\n- Dashboard v2 wireframes' },
+//   { _id: 2, title: 'Weekend trip ideas',    tag: 'personal', date: 'Mar 12, 2026', content: 'Thinking about a long weekend somewhere quiet. Maybe Queenstown or Wanaka.\n\nThings to book:\n- Accommodation\n- Rental car\n- Hiking gear rental' },
+//   { _id: 3, title: 'Focus timer app concept', tag: 'idea',   date: 'Mar 10, 2026', content: 'A minimal focus timer that blocks distracting sites and tracks sessions.\n\nKey screens:\n- Timer\n- Session history\n- Settings' },
+//   { _id: 4, title: 'Fix prod auth bug',     tag: 'urgent',   date: 'Mar 9, 2026',  content: 'JWT tokens expiring early in Safari. Need to investigate cookie SameSite settings and token refresh logic.' },
+// ];
 
 function Home() {
-  const [notes, setNotes]       = useState(INITIAL_NOTES);
+  const [notes, setNotes] = useState([]);
   const [selectedNote, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleNoteCreated = (note) => {
-    setNotes(prev => [note, ...prev]);
-    setSelected(note);
+  useEffect(() => {
+    getNotes()
+      .then(data => setNotes(data))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleNoteCreated = async (note) => {
+    const created = await createNote(note);
+    setNotes(prev => [created, ...prev]);
+    setSelected(created);
     setShowForm(false);
   };
 
-  const handleEdit = (updatedNote) => {
-    setNotes(prev => prev.map(n => n.id === updatedNote.id ? updatedNote : n));
-    setSelected(updatedNote);
+  const handleEdit = async (updatedNote) => {
+    const saved = await updateNote(updatedNote._id, updatedNote);
+    setNotes(prev => prev.map(n => n._id === saved._id ? saved : n));
+    setSelected(saved);
   };
 
-  const handleDelete = (id) => {
-    setNotes(prev => prev.filter(n => n.id !== id));
+  const handleDelete = async (_id) => {
+    await deleteNote(_id);
+    setNotes(prev => prev.filter(n => n._id !== _id));
     setSelected(null);
   };
+
+  if (loading) return (
+    <div className="flex h-screen w-full items-center justify-center text-gray-400">
+      Loading...
+    </div>
+  );
 
   return (
     <div className="flex h-screen w-full bg-white">
@@ -52,7 +69,7 @@ function Home() {
           <NoteList
             notes={notes}
             onSelectNote={(n) => { setSelected(n); setShowForm(false); }}
-            selectedNoteId={selectedNote?.id}
+            selectedNoteId={selectedNote?._id}
           />
         </div>
       </aside>

@@ -11,16 +11,16 @@ const TAG_LIST = ['work', 'personal', 'idea', 'urgent'];
 
 function NoteCard({ note, onDelete, onEdit }) {
   const [editing, setEditing] = useState(false);
-  const [title, setTitle]     = useState(note.title);
-  const [content, setContent]       = useState(note.content);
-  const [tag, setTag]         = useState(note.tag);
+  const [title, setTitle] = useState(note.title);
+  const [content, setContent] = useState(note.content);
+  const [tag, setTag] = useState(note.tag);
 
   useEffect(() => {
     setTitle(note.title);
     setContent(note.content);
     setTag(note.tag);
     setEditing(false);
-  }, [note.id]);
+  }, [note._id]);
 
   const tagStyle = TAGS[tag] || TAGS.work;
 
@@ -118,7 +118,7 @@ function NoteCard({ note, onDelete, onEdit }) {
           Edit
         </button>
         <button
-          onClick={() => onDelete(note.id)}
+          onClick={() => onDelete(note._id)}
           className="text-sm text-red-500 hover:text-red-700 border border-red-200 hover:bg-red-50 px-4 py-1.5 rounded-lg transition-colors"
         >
           Delete

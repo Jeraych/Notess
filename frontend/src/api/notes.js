@@ -17,7 +17,7 @@ export const getNote = async (id) => {
 export const createNote = async (data) => {
     const res = await fetch (BASE_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'applications/json'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     })
     return res.json();
@@ -27,9 +27,10 @@ export const createNote = async (data) => {
 export const updateNote = async (id, data) => {
     const res = await fetch(`${BASE_URL}/${id}`, {
         method: 'PATCH',
-        headers: {'Content-Type': 'applications/json'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     })
+    return res.json();
 }
 
 // Delete
