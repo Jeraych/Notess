@@ -15,13 +15,9 @@ function NoteForm({ onNoteCreated, onCancel }) {
   const handleSubmit = () => {
     if (!title.trim()) return;
     const newNote = {
-      id: Date.now(),
       title: title.trim(),
       content: content.trim() || '(no content)',
       tag,
-      date: new Date().toLocaleDateString('en-NZ', {
-        month: 'short', day: 'numeric', year: 'numeric'
-      }),
     };
     onNoteCreated(newNote);
   };

@@ -105,7 +105,11 @@ function NoteCard({ note, onDelete, onEdit }) {
           {tagStyle.label}
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-2 leading-snug">{note.title}</h2>
-        <p className="text-sm text-gray-400 mb-6">{note.date}</p>
+        <p className="text-sm text-gray-400 mb-6">
+            {new Date(note.createdAt).toLocaleDateString('en-NZ', {
+                month: 'short', day: 'numeric', year: 'numeric'
+            })}
+        </p>
         <hr className="border-t-2 border-gray-100 mb-6" />
         <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{note.content}</div>
       </div>
