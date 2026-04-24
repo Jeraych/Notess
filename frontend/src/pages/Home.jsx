@@ -1,22 +1,18 @@
 import { useState, useEffect } from "react";
 import { getNotes, createNote, updateNote, deleteNote } from "../api/notes";
+import { getUser, removeToken } from "../api/auth";
 import NoteList from "../components/NoteList";
 import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 
-// const INITIAL_NOTES = [
-//   { _id: 1, title: 'Sprint planning notes', tag: 'work',     date: 'Mar 14, 2026', content: 'Kick off the new sprint cycle. Assign tickets to frontend and backend teams. Review blockers from last sprint.\n\nPriority items:\n- Auth flow refactor\n- Notification service\n- Dashboard v2 wireframes' },
-//   { _id: 2, title: 'Weekend trip ideas',    tag: 'personal', date: 'Mar 12, 2026', content: 'Thinking about a long weekend somewhere quiet. Maybe Queenstown or Wanaka.\n\nThings to book:\n- Accommodation\n- Rental car\n- Hiking gear rental' },
-//   { _id: 3, title: 'Focus timer app concept', tag: 'idea',   date: 'Mar 10, 2026', content: 'A minimal focus timer that blocks distracting sites and tracks sessions.\n\nKey screens:\n- Timer\n- Session history\n- Settings' },
-//   { _id: 4, title: 'Fix prod auth bug',     tag: 'urgent',   date: 'Mar 9, 2026',  content: 'JWT tokens expiring early in Safari. Need to investigate cookie SameSite settings and token refresh logic.' },
-// ];
-
-function Home() {
+function Home({ onLogout }) {
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const user = getUser(); // reads from JWT in localStorage
 
   useEffect(() => {
     getNotes()
@@ -25,18 +21,10 @@ function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (error)
-    return (
-      <div className="flex h-screen w-full items-center justify-center text-red-400">
-        {error}
-      </div>
-    );
-
-  useEffect(() => {
-    getNotes()
-      .then((data) => setNotes(data))
-      .finally(() => setLoading(false));
-  }, []);
+  const handleLogout = () => {
+    removeToken();
+    onLogout();
+  };
 
   const handleNoteCreated = async (note) => {
     const created = await createNote(note);
@@ -64,10 +52,18 @@ function Home() {
       </div>
     );
 
+  if (error)
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-red-400">
+        {error}
+      </div>
+    );
+
   return (
     <div className="flex h-screen w-full bg-white">
       {/* Sidebar */}
       <aside className="w-64 min-w-64 flex flex-col border-r-2 border-gray-200 bg-gray-50">
+        {/* Header */}
         <div className="p-4 border-b-2 border-gray-200">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
@@ -85,6 +81,8 @@ function Home() {
             + New note
           </button>
         </div>
+
+        {/* Note list */}
         <div className="flex-1 overflow-y-auto">
           <NoteList
             notes={notes}
@@ -94,6 +92,26 @@ function Home() {
             }}
             selectedNoteId={selectedNote?._id}
           />
+        </div>
+
+        {/* User footer */}
+        <div className="p-4 border-t-2 border-gray-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+              <span className="text-xs font-semibold text-blue-600">
+                {user?.username?.[0]?.toUpperCase() ?? "?"}
+              </span>
+            </div>
+            <span className="text-xs font-medium text-gray-600 truncate max-w-[100px]">
+              {user?.username ?? "User"}
+            </span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            Log out
+          </button>
         </div>
       </aside>
 
