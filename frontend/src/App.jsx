@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { getUser } from "./api/auth";
 import AuthPage from "./pages/AuthPage";
 import Home from "./pages/Home";
@@ -16,6 +17,7 @@ function App() {
         <AuthPage onAuth={() => setIsAuthed(true)} />
       )}
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }
