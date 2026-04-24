@@ -1,11 +1,18 @@
 const express = require("express");
 const Note = require("../models/Note");
+const protect = require("../middleware/auth");
+
 const router = express.Router();
 
 // Create
-router.post("/", async (req, res) => {
+router.post("/", protect, async (req, res) => {
   try {
-    const note = await Note.create(req.body);
+    const note = await Note.create({
+      title: req.body.title,
+      content: req.body.content,
+      tag: req.body.tag,
+      userId: req.user.userId,
+    });
     res.status(201).json(note);
   } catch (error) {
     // Handle validation errors
@@ -18,19 +25,25 @@ router.post("/", async (req, res) => {
 });
 
 // Get all with pagination and sort
-router.get("/", async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = "-createdAt" } = req.query;
 
     const query = {};
 
-    const notes = await Note.find(query)
+    const notes = await Note.find({
+      ...query,
+      userId: req.user.userId,
+    })
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
       .select("title content tag createdAt");
 
-    const total = await Note.countDocuments(query);
+    const total = await Note.countDocuments({
+      ...query,
+      userId: req.user.userId,
+    });
 
     res.json({
       notes,
@@ -47,9 +60,12 @@ router.get("/", async (req, res) => {
 });
 
 // Get by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", protect, async (req, res) => {
   try {
-    const note = await Note.findById(req.params.id);
+    const note = await Note.findById({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
     if (!note) {
       return res.status(404).json({ error: "Note not found" });
     }
@@ -63,10 +79,13 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", protect, async (req, res) => {
   try {
     const note = await Note.findByIdAndUpdate(
-      req.params.id,
+      {
+        _id: req.params.id,
+        userId: req.user.userId,
+      },
       { $set: req.body },
       { returnDocument: "after", runValidators: true },
     );
@@ -80,9 +99,12 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
-    const note = await Note.findByIdAndDelete(req.params.id);
+    const note = await Note.findByIdAndDelete({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
     if (!note) {
       return res.status(404).json({ error: "Note not found" });
     }
