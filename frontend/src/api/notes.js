@@ -1,5 +1,6 @@
 import { getToken } from "./auth";
-const BASE_URL = "http://localhost:5000/api/notes";
+const BASE_URL = import.meta.env.VITE_API_URL;
+const API = `${BASE_URL}/api/notes`;
 
 const authHeaders = () => ({
   "Content-Type": "application/json",
@@ -8,7 +9,7 @@ const authHeaders = () => ({
 
 // Get all
 export const getNotes = async () => {
-  const res = await fetch(BASE_URL, { headers: authHeaders() });
+  const res = await fetch(API, { headers: authHeaders() });
   if (!res.ok) throw await res.json();
   const data = await res.json();
   return data.notes;
@@ -16,13 +17,13 @@ export const getNotes = async () => {
 
 // Get by ID
 export const getNote = async (id) => {
-  const res = await fetch(`${BASE_URL}/${id}`, { headers: authHeaders() });
+  const res = await fetch(`${API}/${id}`, { headers: authHeaders() });
   return res.json();
 };
 
 // Post create
 export const createNote = async (data) => {
-  const res = await fetch(BASE_URL, {
+  const res = await fetch(API, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(data),
@@ -33,7 +34,7 @@ export const createNote = async (data) => {
 
 // Patch update
 export const updateNote = async (id, data) => {
-  const res = await fetch(`${BASE_URL}/${id}`, {
+  const res = await fetch(`${API}/${id}`, {
     method: "PATCH",
     headers: authHeaders(),
     body: JSON.stringify(data),
@@ -44,7 +45,7 @@ export const updateNote = async (id, data) => {
 
 // Delete
 export const deleteNote = async (id) => {
-  const res = await fetch(`${BASE_URL}/${id}`, {
+  const res = await fetch(`${API}/${id}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
