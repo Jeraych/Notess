@@ -5,10 +5,12 @@ const connectDB = require("./mongo");
 
 const app = express();
 const noteRoutes = require("./routes/notes");
+const userRoutes = require("./routes/users");
 
 app.use(cors());
 app.use(express.json());
 app.use("/api/notes", noteRoutes);
+app.use("/api/users", userRoutes);
 
 connectDB();
 
