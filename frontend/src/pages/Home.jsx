@@ -19,61 +19,67 @@ function Home() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-  getNotes()
-      .then(data => setNotes(data))
-      .catch(() => setError('Failed to load notes'))
+    getNotes()
+      .then((data) => setNotes(data))
+      .catch(() => setError("Failed to load notes"))
       .finally(() => setLoading(false));
   }, []);
 
-  if (error) return (
-  <div className="flex h-screen w-full items-center justify-center text-red-400">
-      {error}
-  </div>
-  );
+  if (error)
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-red-400">
+        {error}
+      </div>
+    );
 
   useEffect(() => {
     getNotes()
-      .then(data => setNotes(data))
+      .then((data) => setNotes(data))
       .finally(() => setLoading(false));
   }, []);
 
   const handleNoteCreated = async (note) => {
     const created = await createNote(note);
-    setNotes(prev => [created, ...prev]);
+    setNotes((prev) => [created, ...prev]);
     setSelected(created);
     setShowForm(false);
   };
 
   const handleEdit = async (updatedNote) => {
     const saved = await updateNote(updatedNote._id, updatedNote);
-    setNotes(prev => prev.map(n => n._id === saved._id ? saved : n));
+    setNotes((prev) => prev.map((n) => (n._id === saved._id ? saved : n)));
     setSelected(saved);
   };
 
   const handleDelete = async (_id) => {
     await deleteNote(_id);
-    setNotes(prev => prev.filter(n => n._id !== _id));
+    setNotes((prev) => prev.filter((n) => n._id !== _id));
     setSelected(null);
   };
 
-  if (loading) return (
-    <div className="flex h-screen w-full items-center justify-center text-gray-400">
-      Loading...
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-gray-400">
+        Loading...
+      </div>
+    );
 
   return (
     <div className="flex h-screen w-full bg-white">
-
       {/* Sidebar */}
       <aside className="w-64 min-w-64 flex flex-col border-r-2 border-gray-200 bg-gray-50">
         <div className="p-4 border-b-2 border-gray-200">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">My Notes</h1>
+            <h1 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+              My Notes
+            </h1>
             <span className="text-xs text-gray-300">{notes.length} notes</span>
           </div>
           <button
-            onClick={() => { setShowForm(true); setSelected(null); }}
+            onClick={() => {
+              setShowForm(true);
+              setSelected(null);
+            }}
             className="w-full flex items-center justify-center gap-2 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-white transition-colors"
           >
             + New note
@@ -82,7 +88,10 @@ function Home() {
         <div className="flex-1 overflow-y-auto">
           <NoteList
             notes={notes}
-            onSelectNote={(n) => { setSelected(n); setShowForm(false); }}
+            onSelectNote={(n) => {
+              setSelected(n);
+              setShowForm(false);
+            }}
             selectedNoteId={selectedNote?._id}
           />
         </div>
@@ -103,18 +112,25 @@ function Home() {
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-30">
-              <rect x="6" y="3" width="24" height="30" rx="3"/>
-              <line x1="12" y1="12" x2="24" y2="12"/>
-              <line x1="12" y1="18" x2="24" y2="18"/>
-              <line x1="12" y1="24" x2="18" y2="24"/>
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 36 36"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="opacity-30"
+            >
+              <rect x="6" y="3" width="24" height="30" rx="3" />
+              <line x1="12" y1="12" x2="24" y2="12" />
+              <line x1="12" y1="18" x2="24" y2="18" />
+              <line x1="12" y1="24" x2="18" y2="24" />
             </svg>
             <p className="text-sm font-medium text-gray-500">No note open</p>
             <p className="text-sm">Select a note or create a new one</p>
           </div>
         )}
       </main>
-
     </div>
   );
 }

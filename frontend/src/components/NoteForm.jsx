@@ -1,22 +1,30 @@
 import { useState } from "react";
 
 const TAGS = {
-  work:     { bg: 'bg-blue-50',   text: 'text-blue-700',   ring: 'ring-blue-400' },
-  personal: { bg: 'bg-green-50',  text: 'text-green-700',  ring: 'ring-green-400' },
-  idea:     { bg: 'bg-purple-50', text: 'text-purple-700', ring: 'ring-purple-400' },
-  urgent:   { bg: 'bg-red-50',    text: 'text-red-700',    ring: 'ring-red-400' },
+  work: { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-400" },
+  personal: {
+    bg: "bg-green-50",
+    text: "text-green-700",
+    ring: "ring-green-400",
+  },
+  idea: {
+    bg: "bg-purple-50",
+    text: "text-purple-700",
+    ring: "ring-purple-400",
+  },
+  urgent: { bg: "bg-red-50", text: "text-red-700", ring: "ring-red-400" },
 };
 
 function NoteForm({ onNoteCreated, onCancel }) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [tag, setTag] = useState('work');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tag, setTag] = useState("work");
 
   const handleSubmit = () => {
     if (!title.trim()) return;
     const newNote = {
       title: title.trim(),
-      content: content.trim() || '(no content)',
+      content: content.trim() || "(no content)",
       tag,
     };
     onNoteCreated(newNote);
@@ -41,7 +49,7 @@ function NoteForm({ onNoteCreated, onCancel }) {
           </label>
           <input
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="Give your note a title..."
             className="w-full px-4 py-2.5 text-sm border-2 border-gray-200 rounded-lg outline-none focus:border-gray-400 transition-colors"
           />
@@ -58,7 +66,7 @@ function NoteForm({ onNoteCreated, onCancel }) {
                 onClick={() => setTag(key)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium capitalize transition-all
                   ${s.bg} ${s.text}
-                  ${tag === key ? `ring-2 ${s.ring}` : 'opacity-50 hover:opacity-80'}`}
+                  ${tag === key ? `ring-2 ${s.ring}` : "opacity-50 hover:opacity-80"}`}
               >
                 {key}
               </button>
@@ -72,7 +80,7 @@ function NoteForm({ onNoteCreated, onCancel }) {
           </label>
           <textarea
             value={content}
-            onChange={e => setContent(e.target.value)}
+            onChange={(e) => setContent(e.target.value)}
             placeholder="Write your note here..."
             rows={20}
             className="w-full px-4 py-2.5 text-sm border-2 border-gray-200 rounded-lg outline-none resize-none focus:border-gray-400 transition-colors"
