@@ -73,6 +73,7 @@ The default values work out of the box for local development:
 MONGO_URI=mongodb://localhost:27017/notesdb
 PORT=5000
 JWT_SECRET=random
+CORS_ORIGIN=http://localhost:5173
 ```
 
 4. Create a `.env` file in the `frontend` directory using the provided template

@@ -1,16 +1,52 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Note = require("../models/Note");
 const protect = require("../middleware/auth");
 
 const router = express.Router();
+const ALLOWED_SORTS = new Set(["createdAt", "-createdAt", "updatedAt", "-updatedAt"]);
+const ALLOWED_TAGS = new Set(["work", "personal", "idea", "urgent"]);
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+const toSafeText = (value) => {
+  if (typeof value !== "string") return "";
+  return value.trim();
+};
+
+const buildCreatePayload = (body = {}) => {
+  const payload = {
+    title: toSafeText(body.title),
+    content: toSafeText(body.content),
+  };
+
+  if (body.tag !== undefined) {
+    payload.tag = toSafeText(body.tag).toLowerCase();
+  }
+
+  return payload;
+};
+
+const buildUpdatePayload = (body = {}) => {
+  const payload = {};
+
+  if (body.title !== undefined) payload.title = toSafeText(body.title);
+  if (body.content !== undefined) payload.content = toSafeText(body.content);
+  if (body.tag !== undefined) payload.tag = toSafeText(body.tag).toLowerCase();
+
+  return payload;
+};
 
 // Create
 router.post("/", protect, async (req, res) => {
   try {
+    const payload = buildCreatePayload(req.body);
+    if (payload.tag && !ALLOWED_TAGS.has(payload.tag)) {
+      return res.status(400).json({ error: "Invalid tag value" });
+    }
+
     const note = await Note.create({
-      title: req.body.title,
-      content: req.body.content,
-      tag: req.body.tag,
+      ...payload,
       userId: req.user.userId,
     });
     res.status(201).json(note);
@@ -27,7 +63,11 @@ router.post("/", protect, async (req, res) => {
 // Get all with pagination and sort
 router.get("/", protect, async (req, res) => {
   try {
-    const { page = 1, limit = 10, sort = "-createdAt" } = req.query;
+    const rawPage = Number.parseInt(req.query.page, 10);
+    const rawLimit = Number.parseInt(req.query.limit, 10);
+    const page = Number.isNaN(rawPage) ? 1 : Math.max(rawPage, 1);
+    const limit = Number.isNaN(rawLimit) ? 10 : Math.min(Math.max(rawLimit, 1), 100);
+    const sort = ALLOWED_SORTS.has(req.query.sort) ? req.query.sort : "-createdAt";
 
     const query = {};
 
@@ -37,7 +77,7 @@ router.get("/", protect, async (req, res) => {
     })
       .sort(sort)
       .skip((page - 1) * limit)
-      .limit(parseInt(limit))
+      .limit(limit)
       .select("title content tag createdAt");
 
     const total = await Note.countDocuments({
@@ -48,8 +88,8 @@ router.get("/", protect, async (req, res) => {
     res.json({
       notes,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page,
+        limit,
         total,
         pages: Math.ceil(total / limit),
       },
@@ -62,7 +102,11 @@ router.get("/", protect, async (req, res) => {
 // Get by ID
 router.get("/:id", protect, async (req, res) => {
   try {
-    const note = await Note.findById({
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "Invalid note ID" });
+    }
+
+    const note = await Note.findOne({
       _id: req.params.id,
       userId: req.user.userId,
     });
@@ -81,12 +125,24 @@ router.get("/:id", protect, async (req, res) => {
 // Update
 router.patch("/:id", protect, async (req, res) => {
   try {
-    const note = await Note.findByIdAndUpdate(
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "Invalid note ID" });
+    }
+
+    const updates = buildUpdatePayload(req.body);
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No valid fields provided" });
+    }
+    if (updates.tag && !ALLOWED_TAGS.has(updates.tag)) {
+      return res.status(400).json({ error: "Invalid tag value" });
+    }
+
+    const note = await Note.findOneAndUpdate(
       {
         _id: req.params.id,
         userId: req.user.userId,
       },
-      { $set: req.body },
+      { $set: updates },
       { returnDocument: "after", runValidators: true },
     );
     if (!note) {
@@ -101,7 +157,11 @@ router.patch("/:id", protect, async (req, res) => {
 // Delete
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const note = await Note.findByIdAndDelete({
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "Invalid note ID" });
+    }
+
+    const note = await Note.findOneAndDelete({
       _id: req.params.id,
       userId: req.user.userId,
     });
