@@ -6,9 +6,18 @@ const connectDB = require("./mongo");
 const app = express();
 const noteRoutes = require("./routes/notes");
 const userRoutes = require("./routes/users");
+const normalizeOrigin = (value = "") => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  try {
+    return new URL(trimmed).origin;
+  } catch {
+    return trimmed.replace(/\/+$/, "");
+  }
+};
 const allowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 
 app.disable("x-powered-by");
@@ -18,7 +27,7 @@ app.use(
       // Allow server-to-server tools and non-browser requests without Origin header.
       if (!origin) return callback(null, true);
       if (allowedOrigins.length === 0) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (allowedOrigins.includes(normalizeOrigin(origin))) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
