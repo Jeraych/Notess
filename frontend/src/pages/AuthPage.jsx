@@ -9,17 +9,16 @@ function AuthPage({ onAuth }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!username.trim() || !password.trim()) return;
+    const normalizedUsername = username.trim().toLowerCase();
+    if (!normalizedUsername || !password.trim()) return;
     setError(null);
     setLoading(true);
     try {
       if (mode === "register") {
-        await register(username, password);
-        // After registering, log them in automatically
-        const data = await login(username, password);
+        const data = await register(normalizedUsername, password);
         saveToken(data.token);
       } else {
-        const data = await login(username, password);
+        const data = await login(normalizedUsername, password);
         saveToken(data.token);
       }
       onAuth(); // tell App to re-check auth

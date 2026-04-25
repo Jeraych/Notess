@@ -1,5 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
-const API = `${BASE_URL}/API/users`;
+const API = `${BASE_URL}/api/users`;
 
 export const register = async (username, password) => {
   const res = await fetch(`${API}/register`, {

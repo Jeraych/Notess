@@ -1,8 +1,14 @@
 const jwt = require("jsonwebtoken");
 
 const protect = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
+  const authHeader = req.headers.authorization || "";
+  const [scheme, token] = authHeader.split(" ");
+
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ error: "Auth is not configured" });
+  }
+
+  if (scheme !== "Bearer" || !token) {
     return res.status(401).json({ error: "No token" });
   }
 
