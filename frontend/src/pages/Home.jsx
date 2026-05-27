@@ -1,25 +1,51 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getNotes, createNote, updateNote, deleteNote } from "../api/notes";
 import { getUser, removeToken } from "../api/auth";
 import NoteList from "../components/NoteList";
 import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 
+const getErrorMessage = (error) =>
+  error?.error || error?.message || "The backend did not respond. Your draft was kept locally.";
+
 function Home({ onLogout }) {
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadHint, setLoadHint] = useState(false);
   const [error, setError] = useState(null);
+  const [syncStatus, setSyncStatus] = useState(null);
+  const [deletedNote, setDeletedNote] = useState(null);
+  const [restoringDelete, setRestoringDelete] = useState(false);
 
   const user = getUser(); // reads from JWT in localStorage
 
   useEffect(() => {
+    const hintTimer = setTimeout(() => setLoadHint(true), 1800);
+
     getNotes()
-      .then((data) => setNotes(data))
-      .catch(() => setError("Failed to load notes"))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        setNotes(data);
+        setError(null);
+      })
+      .catch(() =>
+        setError(
+          "Failed to load notes. If the Render backend is waking up, refresh in a moment.",
+        ),
+      )
+      .finally(() => {
+        clearTimeout(hintTimer);
+        setLoading(false);
+      });
   }, []);
+
+  useEffect(() => {
+    if (syncStatus?.type !== "success") return undefined;
+
+    const timer = setTimeout(() => setSyncStatus(null), 4000);
+    return () => clearTimeout(timer);
+  }, [syncStatus]);
 
   const handleLogout = () => {
     removeToken();
@@ -27,34 +53,136 @@ function Home({ onLogout }) {
   };
 
   const handleNoteCreated = async (note) => {
-    const created = await createNote(note);
-    setNotes((prev) => [created, ...prev]);
-    setSelected(created);
-    setShowForm(false);
+    setSyncStatus({
+      type: "saving",
+      message: "Saving note. If Render is waking up, this can take a few seconds.",
+    });
+
+    try {
+      const created = await createNote(note);
+      setNotes((prev) => [created, ...prev]);
+      setSelected(created);
+      setShowForm(false);
+      setDeletedNote(null);
+      setSyncStatus({ type: "success", message: "Note saved." });
+      return created;
+    } catch (error) {
+      setSyncStatus({ type: "error", message: getErrorMessage(error) });
+      throw error;
+    }
   };
 
   const handleEdit = async (updatedNote) => {
-    const saved = await updateNote(updatedNote._id, updatedNote);
-    setNotes((prev) => prev.map((n) => (n._id === saved._id ? saved : n)));
-    setSelected(saved);
+    setSyncStatus({
+      type: "saving",
+      message: "Saving changes. If Render is waking up, this can take a few seconds.",
+    });
+
+    try {
+      const saved = await updateNote(updatedNote._id, updatedNote);
+      setNotes((prev) => prev.map((n) => (n._id === saved._id ? saved : n)));
+      setSelected(saved);
+      setDeletedNote(null);
+      setSyncStatus({ type: "success", message: "Changes saved." });
+      return saved;
+    } catch (error) {
+      setSyncStatus({ type: "error", message: getErrorMessage(error) });
+      throw error;
+    }
   };
 
   const handleDelete = async (_id) => {
-    await deleteNote(_id);
-    setNotes((prev) => prev.filter((n) => n._id !== _id));
-    setSelected(null);
+    const deleted = notes.find((note) => note._id === _id);
+    setSyncStatus({
+      type: "saving",
+      message: "Deleting note. If Render is waking up, this can take a few seconds.",
+    });
+
+    try {
+      await deleteNote(_id);
+      setNotes((prev) => prev.filter((n) => n._id !== _id));
+      setSelected(null);
+      setDeletedNote(deleted || null);
+      setSyncStatus({ type: "success", message: "Note deleted." });
+    } catch (error) {
+      setSyncStatus({ type: "error", message: getErrorMessage(error) });
+      throw error;
+    }
+  };
+
+  const restoreDeletedNote = useCallback(async () => {
+    if (!deletedNote || restoringDelete) return;
+
+    setRestoringDelete(true);
+    setSyncStatus({
+      type: "saving",
+      message: "Restoring deleted note...",
+    });
+
+    try {
+      const restored = await createNote({
+        title: deletedNote.title,
+        content: deletedNote.content,
+        tag: deletedNote.tag,
+      });
+      setNotes((prev) => [restored, ...prev]);
+      setSelected(restored);
+      setDeletedNote(null);
+      setSyncStatus({ type: "success", message: "Note restored." });
+    } catch (error) {
+      setSyncStatus({
+        type: "error",
+        message: `Could not restore note: ${getErrorMessage(error)}`,
+      });
+    } finally {
+      setRestoringDelete(false);
+    }
+  }, [deletedNote, restoringDelete]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const target = event.target;
+      const isEditingText =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target?.isContentEditable;
+
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "z" &&
+        !isEditingText &&
+        deletedNote
+      ) {
+        event.preventDefault();
+        restoreDeletedNote();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [deletedNote, restoreDeletedNote]);
+
+  const syncStatusClasses = {
+    saving: "border-blue-200 bg-blue-50 text-blue-800",
+    success: "border-green-200 bg-green-50 text-green-800",
+    error: "border-amber-200 bg-amber-50 text-amber-800",
   };
 
   if (loading)
     return (
-      <div className="flex h-screen w-full items-center justify-center text-gray-400">
-        Loading...
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-2 text-gray-400">
+        <p>Loading...</p>
+        {loadHint ? (
+          <p className="text-sm text-gray-500">
+            Waking the secure backend. This is normal after idle time.
+          </p>
+        ) : null}
       </div>
     );
 
   if (error)
     return (
-      <div className="flex h-screen w-full items-center justify-center text-red-400">
+      <div className="flex h-screen w-full items-center justify-center px-6 text-center text-red-400">
         {error}
       </div>
     );
@@ -117,6 +245,18 @@ function Home({ onLogout }) {
 
       {/* Main panel */}
       <main className="flex-1 flex flex-col overflow-hidden">
+        {syncStatus ? (
+          <div
+            className={`mx-12 mt-5 rounded-lg border px-4 py-3 text-sm ${
+              syncStatusClasses[syncStatus.type]
+            }`}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <span>{syncStatus.message}</span>
+            </div>
+          </div>
+        ) : null}
+
         {showForm ? (
           <NoteForm
             onNoteCreated={handleNoteCreated}

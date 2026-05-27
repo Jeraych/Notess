@@ -14,8 +14,17 @@ const noteSchema = new mongoose.Schema(
       enum: ["work", "personal", "idea", "urgent"],
       default: "work",
     },
+    clientMutationId: { type: String },
   },
   { timestamps: true },
+);
+
+noteSchema.index(
+  { userId: 1, clientMutationId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientMutationId: { $type: "string" } },
+  },
 );
 
 module.exports = mongoose.model("Note", noteSchema);

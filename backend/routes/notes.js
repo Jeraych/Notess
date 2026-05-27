@@ -14,10 +14,16 @@ const toSafeText = (value) => {
   return value.trim();
 };
 
+const optionalSafeText = (value) => {
+  const text = toSafeText(value);
+  return text || undefined;
+};
+
 const buildCreatePayload = (body = {}) => {
   const payload = {
     title: toSafeText(body.title),
     content: toSafeText(body.content),
+    clientMutationId: optionalSafeText(body.clientMutationId),
   };
 
   if (body.tag !== undefined) {
@@ -43,6 +49,17 @@ router.post("/", protect, async (req, res) => {
     const payload = buildCreatePayload(req.body);
     if (payload.tag && !ALLOWED_TAGS.has(payload.tag)) {
       return res.status(400).json({ error: "Invalid tag value" });
+    }
+
+    if (payload.clientMutationId) {
+      const existingNote = await Note.findOne({
+        userId: req.user.userId,
+        clientMutationId: payload.clientMutationId,
+      });
+
+      if (existingNote) {
+        return res.status(200).json(existingNote);
+      }
     }
 
     const note = await Note.create({
